@@ -47,7 +47,10 @@ def generate_launch_description():
         # ---------------------------------------------------------
         # 2. REMAPPING: ('/tf', 'tf') becomes '/<robot_name>/tf'
         # ---------------------------------------------------------
-        remappings=[('/tf', 'tf')]
+        remappings=[
+            ('/tf', 'tf'),
+            ('/tf_static', 'tf_static')
+        ]
     )
 
     return LaunchDescription([
