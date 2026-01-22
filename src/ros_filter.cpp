@@ -858,6 +858,10 @@ void RosFilter<T>::loadParams()
   // Whether we're publishing the acceleration state transform
   publish_acceleration_ = this->declare_parameter("publish_acceleration", false);
 
+  // Whether we're publishing the gravity-removed acceleration from IMU
+  publish_acceleration_gravity_removed_ = this->declare_parameter(
+    "publish_acceleration_gravity_removed", true);
+
   // Whether we'll allow old measurements to cause a re-publication of the updated state
   permit_corrected_publication_ = this->declare_parameter("permit_corrected_publication", false);
 
@@ -2017,6 +2021,13 @@ void RosFilter<T>::initialize()
       "accel/filtered", rclcpp::QoS(10), publisher_options);
   }
 
+  // Optional gravity-removed acceleration publisher
+  if (publish_acceleration_gravity_removed_) {
+    accel_gravity_removed_pub_ =
+      this->create_publisher<geometry_msgs::msg::AccelStamped>(
+      "accel/gravity_removed", rclcpp::QoS(10), publisher_options);
+  }
+
   const std::chrono::duration<double> timespan{1.0 / frequency_};
   timer_ = rclcpp::GenericTimer<rclcpp::VoidCallbackType>::make_shared(
     this->get_clock(), std::chrono::duration_cast<std::chrono::nanoseconds>(timespan),
@@ -2651,6 +2662,20 @@ bool RosFilter<T>::prepareAcceleration(
           trans.getRotation() << "Acceleration due to gravity is " << rotNorm <<
           "After removing acceleration due to gravity, acceleration is " <<
           acc_tmp << "\n");
+
+      // Publish gravity-removed acceleration if enabled
+      if (publish_acceleration_gravity_removed_ && accel_gravity_removed_pub_) {
+        auto accel_msg = std::make_unique<geometry_msgs::msg::AccelStamped>();
+        accel_msg->header = msg->header;
+        accel_msg->header.frame_id = target_frame;
+        accel_msg->accel.linear.x = acc_tmp.getX();
+        accel_msg->accel.linear.y = acc_tmp.getY();
+        accel_msg->accel.linear.z = acc_tmp.getZ();
+        accel_msg->accel.angular.x = msg->angular_velocity.x;
+        accel_msg->accel.angular.y = msg->angular_velocity.y;
+        accel_msg->accel.angular.z = msg->angular_velocity.z;
+        accel_gravity_removed_pub_->publish(std::move(accel_msg));
+      }
     }
 
     // Transform to correct frame
