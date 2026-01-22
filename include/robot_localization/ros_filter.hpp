@@ -51,6 +51,7 @@
 #include <robot_localization/srv/set_pose.hpp>
 #include <robot_localization/srv/toggle_filter_processing.hpp>
 
+#include <geometry_msgs/msg/accel_stamped.hpp>
 #include <geometry_msgs/msg/accel_with_covariance_stamped.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
@@ -483,6 +484,10 @@ protected:
   //!
   bool publish_acceleration_;
 
+  //! @brief Whether we publish the gravity-removed acceleration from IMU
+  //!
+  bool publish_acceleration_gravity_removed_;
+
   //! @brief Whether we publish the transform from the world_frame to the
   //! base_link_frame
   //!
@@ -778,6 +783,11 @@ protected:
   //!
   rclcpp::Publisher<geometry_msgs::msg::AccelWithCovarianceStamped>::SharedPtr
     accel_pub_;
+
+  //! @brief Gravity-removed acceleration publisher
+  //!
+  rclcpp::Publisher<geometry_msgs::msg::AccelStamped>::SharedPtr
+    accel_gravity_removed_pub_;
 
   //! @brief Our filter (EKF, UKF, etc.)
   //!
