@@ -40,7 +40,7 @@ def generate_launch_description():
 
         parameters=[
             # Path to the YAML file
-            os.path.join(get_package_share_directory("robot_localization"), 'params', 'ekf.yaml'),
+            os.path.join(get_package_share_directory("robot_localization"), 'params', 'ekf_sim.yaml'),
             {'use_sim_time': use_sim_time}
         ],
 
