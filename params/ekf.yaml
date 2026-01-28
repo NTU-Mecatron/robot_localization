@@ -157,7 +157,7 @@ ekf_filter_node:
                         false, false, false,
                         false, false, false]
         twist0_queue_size: 10
-        # twist0_rejection_threshold: 2.0
+        twist0_rejection_threshold: 2.0
         twist0_nodelay: false
 
         imu0: vectornav/imu
