@@ -30,6 +30,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED)
 find_package(yaml_cpp_vendor REQUIRED)
@@ -66,7 +67,7 @@ include_directories(
 )
 
 add_library(
-  ${library_name}
+  ${library_name} SHARED
   src/ekf.cpp
   src/ukf.cpp
   src/filter_base.cpp
@@ -166,6 +167,12 @@ ament_target_dependencies(
   robot_localization_listener_node
   rclcpp
 )
+
+# EKF composable node component
+add_library(ekf_component SHARED src/ekf_component.cpp)
+target_link_libraries(ekf_component ${library_name})
+ament_target_dependencies(ekf_component rclcpp rclcpp_components)
+rclcpp_components_register_nodes(ekf_component "robot_localization::RosEkfComponent")
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -355,7 +362,7 @@ install(
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
-install(TARGETS ${library_name}
+install(TARGETS ${library_name} ekf_component
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
